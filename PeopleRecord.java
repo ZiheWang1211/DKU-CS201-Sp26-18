@@ -58,4 +58,102 @@ class PeopleRecord {
         this.web = web;
         this.birthday = birthday;
     }
+    // ==================== Getters ====================
+
+    /** @return The person's first name */
+    public String getGivenName() { return givenName; }
+
+    /** @return The person's last name */
+    public String getFamilyName() { return familyName; }
+
+    /** @return The company name */
+    public String getCompanyName() { return companyName; }
+
+    /** @return The street address */
+    public String getAddress() { return address; }
+
+    /** @return The city of residence */
+    public String getCity() { return city; }
+
+    /** @return The county of residence */
+    public String getCounty() { return county; }
+
+    /** @return The state code */
+    public String getState() { return state; }
+
+    /** @return The ZIP/Postal code */
+    public String getZip() { return zip; }
+
+    /** @return The primary phone number */
+    public String getPhone() { return phone; }
+
+    /** @return The secondary phone number */
+    public String getPhone2() { return phone2; }
+
+    /** @return The email address */
+    public String getEmail() { return email; }
+
+    /** @return The website URL */
+    public String getWeb() { return web; }
+
+    /** @return The date of birth in MM/dd/yyyy format */
+    public String getBirthday() { return birthday; }
+
+    /**
+     * Generates a unique key for this person record.
+     * Used as a key in HashMap and for name-based searching.
+     * The pipe symbol '|' is used as a separator to avoid conflicts
+     * with characters that might appear in names.
+     *
+     * @return A string combining given name and family name with a separator
+     */
+    public String getFullName() {
+        return givenName + "|" + familyName;
+    }
+
+    /**
+     * Parses a line from the "people.txt" file and creates a PeopleRecord object.
+     * The expected format is: field1;field2;field3;...;field13
+     * Each field is trimmed to remove leading/trailing whitespace.
+     *
+     * @param line A single line from the data file
+     * @return A new PeopleRecord object populated with the parsed data
+     * @throws IllegalArgumentException If the line doesn't contain exactly 13 fields
+     *
+     * Reference: Basic string splitting approach adapted from
+     * Java String.split() documentation
+     */
+    public static PeopleRecord parse(String line) {
+        // Split the line by semicolon delimiter
+        String[] parts = line.split(";");
+
+        // Validate that we have all 13 required fields
+        if (parts.length != 13) {
+            throw new IllegalArgumentException("Invalid line format: " + line);
+        }
+
+        // Trim whitespace from each field (files often have spaces after semicolons)
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].trim();
+        }
+
+        // Create and return a new PeopleRecord with all fields
+        return new PeopleRecord(
+                parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6],
+                parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]
+        );
+    }
+
+    /**
+     * Returns a string representation of the person record.
+     * Primarily used for debugging and displaying search results.
+     * Format: "givenName familyName (companyName)"
+     *
+     * @return A concise string representation of the person
+     */
+    @Override
+    public String toString() {
+        return String.format("%s %s (%s)", givenName, familyName, companyName);
+    }
+}
 
