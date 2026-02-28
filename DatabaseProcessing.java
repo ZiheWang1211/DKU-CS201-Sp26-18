@@ -92,4 +92,39 @@ public class DatabaseProcessing {
         int end = Math.min(count, list.size());
         return list.subList(0, end);
     }
+     // Simple test main method
+    public static void main(String[] args) {
+        DatabaseProcessing db = new DatabaseProcessing();
+        try {
+            db.loadData("people.txt");
+            System.out.println("Data loaded.");
+
+            int[] info = db.getBSTInfo();
+            System.out.println("BST nodes: " + info[0] + ", height: " + info[1]);
+
+            // Test search
+            List<PeopleRecord> results = db.search("Kiley", "Caldarera");
+            System.out.println("Search results for Kiley Caldarera:");
+            for (PeopleRecord r : results) {
+                System.out.println(r);
+            }
+
+            // Test sort
+            List<PeopleRecord> sorted = db.sort();
+            System.out.println("First 10 sorted records by given name:");
+            for (int i = 0; i < Math.min(10, sorted.size()); i++) {
+                System.out.println(sorted.get(i));
+            }
+
+            // Test word frequency
+            List<Map.Entry<String, Integer>> topWords = db.getMostFrequentWords(5, 4);
+            System.out.println("Top 5 words (len>=4):");
+            for (Map.Entry<String, Integer> e : topWords) {
+                System.out.println(e.getKey() + ": " + e.getValue());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
