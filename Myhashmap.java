@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+mport java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,37 +47,41 @@ class MyHashmap {
         }
 
         int index = hash(key);
-        int i = 0;
-        int firstDeleted = -1;
-        while (i < capacity) {
+        int firstAvailable = -1; // records the first deletable or empty slot encountered
+
+        for (int i = 0; i < capacity; i++) {
             int probe = (index + i * i) % capacity;   // quadratic probing
             Entry entry = table[probe];
+
             if (entry == null) {
-                if (firstDeleted != -1) {
-                    probe = firstDeleted;              // use the first deleted slot found
+                if (firstAvailable == -1) {
+                    firstAvailable = probe;           // first empty slot
                 }
-                table[probe] = new Entry(key, record);
-                size++;
-                return;
+                // continue probing in case the key exists later (though unlikely)
             } else if (entry.isDeleted) {
-                if (firstDeleted == -1) {
-                    firstDeleted = probe;
+                if (firstAvailable == -1) {
+                    firstAvailable = probe;           // first deleted slot
                 }
-                // continue probing in case same key exists later
+                // continue probing
             } else if (entry.key.equals(key)) {
-                entry.value.add(record);                // same key, add record to existing list
+                entry.value.add(record);               // same key, add record to existing list
                 return;
             }
-            i++;
         }
-        throw new RuntimeException("Hash table full");
+
+        // No matching key found; insert into the first available slot
+        if (firstAvailable != -1) {
+            table[firstAvailable] = new Entry(key, record);
+            size++;
+        } else {
+            throw new RuntimeException("Hash table full");
+        }
     }
 
     // Retrieve all records associated with the key
     public List<PeopleRecord> get(String key) {
         int index = hash(key);
-        int i = 0;
-        while (i < capacity) {
+        for (int i = 0; i < capacity; i++) {
             int probe = (index + i * i) % capacity;
             Entry entry = table[probe];
             if (entry == null) {
@@ -85,7 +89,6 @@ class MyHashmap {
             } else if (!entry.isDeleted && entry.key.equals(key)) {
                 return new ArrayList<>(entry.value);
             }
-            i++;
         }
         return null;
     }
@@ -98,8 +101,7 @@ class MyHashmap {
     // Delete the entire entry for the key (lazy deletion)
     public boolean delete(String key) {
         int index = hash(key);
-        int i = 0;
-        while (i < capacity) {
+        for (int i = 0; i < capacity; i++) {
             int probe = (index + i * i) % capacity;
             Entry entry = table[probe];
             if (entry == null) {
@@ -109,7 +111,6 @@ class MyHashmap {
                 size--;
                 return true;
             }
-            i++;
         }
         return false;
     }
