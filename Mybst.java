@@ -1,107 +1,209 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Objects;  // 需要添加这个导入
 
-    class MyBST {
-        private class BSTNode {
-            ArrayList<PeopleRecord> records;
-            BSTNode left, right;
-            BSTNode(PeopleRecord record) {
-                records = new ArrayList<>();
-                records.add(record);
-                left = right = null;
-            }
+/**
+ * Represents a single person record from the "people.txt" file.
+ * Each instance corresponds to one line in the file and serves as a node
+ * in the BST, Heap, and HashMap data structures.
+ *
+ * The fields exactly match the 13 columns in the data file:
+ * given name; family name; company name; address; city; county; state;
+ * zip; phone; phone2; email; web; birthday
+ */
+class PeopleRecord implements Comparable<PeopleRecord> {  // 添加 implements
+    // Personal information fields
+    private String givenName;      // First name of the person
+    private String familyName;     // Last name of the person
+    private String companyName;    // Company where the person works
+    private String address;        // Street address
+    private String city;           // City of residence
+    private String county;         // County of residence
+    private String state;          // State (two-letter code)
+    private String zip;            // ZIP/Postal code
+    private String phone;          // Primary phone number
+    private String phone2;         // Secondary/alternative phone number
+    private String email;          // Email address
+    private String web;            // Website URL
+    private String birthday;       // Date of birth (MM/dd/yyyy format)
+
+    /**
+     * Constructs a PeopleRecord object with all 13 fields.
+     *
+     * @param givenName    Person's first name
+     * @param familyName   Person's last name
+     * @param companyName  Company name
+     * @param address      Street address
+     * @param city         City name
+     * @param county       County name
+     * @param state        State code (e.g., "CA", "NY")
+     * @param zip          ZIP/Postal code
+     * @param phone        Primary phone number
+     * @param phone2       Secondary phone number
+     * @param email        Email address
+     * @param web          Website URL
+     * @param birthday     Date of birth (MM/dd/yyyy)
+     */
+    public PeopleRecord(String givenName, String familyName, String companyName,
+                        String address, String city, String county, String state,
+                        String zip, String phone, String phone2, String email,
+                        String web, String birthday) {
+        this.givenName = givenName;
+        this.familyName = familyName;
+        this.companyName = companyName;
+        this.address = address;
+        this.city = city;
+        this.county = county;
+        this.state = state;
+        this.zip = zip;
+        this.phone = phone;
+        this.phone2 = phone2;
+        this.email = email;
+        this.web = web;
+        this.birthday = birthday;
+    }
+
+    // ==================== Getters ====================
+
+    /** @return The person's first name */
+    public String getGivenName() { return givenName; }
+
+    /** @return The person's last name */
+    public String getFamilyName() { return familyName; }
+
+    /** @return The company name */
+    public String getCompanyName() { return companyName; }
+
+    /** @return The street address */
+    public String getAddress() { return address; }
+
+    /** @return The city of residence */
+    public String getCity() { return city; }
+
+    /** @return The county of residence */
+    public String getCounty() { return county; }
+
+    /** @return The state code */
+    public String getState() { return state; }
+
+    /** @return The ZIP/Postal code */
+    public String getZip() { return zip; }
+
+    /** @return The primary phone number */
+    public String getPhone() { return phone; }
+
+    /** @return The secondary phone number */
+    public String getPhone2() { return phone2; }
+
+    /** @return The email address */
+    public String getEmail() { return email; }
+
+    /** @return The website URL */
+    public String getWeb() { return web; }
+
+    /** @return The date of birth in MM/dd/yyyy format */
+    public String getBirthday() { return birthday; }
+
+    /**
+     * Generates a unique key for this person record.
+     * Used as a key in HashMap and for name-based searching.
+     * The pipe symbol '|' is used as a separator to avoid conflicts
+     * with characters that might appear in names.
+     *
+     * @return A string combining given name and family name with a separator
+     */
+    public String getFullName() {
+        return givenName + "|" + familyName;
+    }
+
+    /**
+     * Parses a line from the "people.txt" file and creates a PeopleRecord object.
+     * The expected format is: field1;field2;field3;...;field13
+     * Each field is trimmed to remove leading/trailing whitespace.
+     *
+     * @param line A single line from the data file
+     * @return A new PeopleRecord object populated with the parsed data
+     * @throws IllegalArgumentException If the line doesn't contain exactly 13 fields
+     *
+     * Reference: Basic string splitting approach adapted from
+     * Java String.split() documentation
+     */
+    public static PeopleRecord parse(String line) {
+        // Split the line by semicolon delimiter
+        String[] parts = line.split(";");
+
+        // Validate that we have all 13 required fields
+        if (parts.length != 13) {
+            throw new IllegalArgumentException("Invalid line format: " + line);
         }
 
-        private BSTNode root;
-        private Comparator<PeopleRecord> comparator;
-
-        // 默认比较器：按 given name + family name 字典序（忽略大小写）
-        public MyBST() {
-            this((p1, p2) -> {
-                int cmp = p1.getGivenName().compareToIgnoreCase(p2.getGivenName());
-                if (cmp == 0) {
-                    cmp = p1.getFamilyName().compareToIgnoreCase(p2.getFamilyName());
-                }
-                return cmp;
-            });
+        // Trim whitespace from each field (files often have spaces after semicolons)
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].trim();
         }
 
-        public MyBST(Comparator<PeopleRecord> comparator) {
-            this.root = null;
-            this.comparator = comparator;
-        }
+        // Create and return a new PeopleRecord with all fields
+        return new PeopleRecord(
+                parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6],
+                parts[7], parts[8], parts[9], parts[10], parts[11], parts[12]
+        );
+    }
 
-        // 插入记录
-        public void insert(PeopleRecord record) {
-            root = insertRec(root, record);
+    /**
+     * Compares this record with another for BST ordering.
+     * Primary sort by given name (case-insensitive), secondary by family name (case-insensitive).
+     * This ensures consistent ordering in the BST and matches the default comparator in MyBST.
+     *
+     * @param other The other PeopleRecord to compare to
+     * @return negative if this < other, 0 if equal, positive if this > other
+     */
+    @Override
+    public int compareTo(PeopleRecord other) {
+        // 先比较givenName（忽略大小写）
+        int givenNameCompare = this.givenName.compareToIgnoreCase(other.givenName);
+        if (givenNameCompare != 0) {
+            return givenNameCompare;
         }
+        // 如果givenName相同，再比较familyName（忽略大小写）
+        return this.familyName.compareToIgnoreCase(other.familyName);
+    }
 
-        private BSTNode insertRec(BSTNode node, PeopleRecord record) {
-            if (node == null) {
-                return new BSTNode(record);
-            }
-            int cmp = comparator.compare(record, node.records.get(0));
-            if (cmp == 0) {
-                node.records.add(record);          // 同名加入当前节点列表
-            } else if (cmp < 0) {
-                node.left = insertRec(node.left, record);
-            } else {
-                node.right = insertRec(node.right, record);
-            }
-            return node;
-        }
+    /**
+     * Compares this record with another for equality.
+     * Two records are considered equal if they have the same given name and family name.
+     * This matches the behavior of compareTo when it returns 0.
+     *
+     * @param obj The object to compare with
+     * @return true if the objects are equal (same given name and family name)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        PeopleRecord that = (PeopleRecord) obj;
+        // 使用equalsIgnoreCase来匹配compareToIgnoreCase的行为
+        return this.givenName.equalsIgnoreCase(that.givenName) &&
+                this.familyName.equalsIgnoreCase(that.familyName);
+    }
 
-        // 根据 givenName 和 familyName 搜索所有匹配记录
-        public List<PeopleRecord> search(String givenName, String familyName) {
-            PeopleRecord dummy = new PeopleRecord(givenName, familyName, "", "", "", "", "", "", "", "", "", "", "");
-            return searchRec(root, dummy);
-        }
+    /**
+     * Generates a hash code based on given name and family name.
+     * Consistent with equals() - equal objects have equal hash codes.
+     *
+     * @return The hash code
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(givenName.toLowerCase(), familyName.toLowerCase());
+    }
 
-        private List<PeopleRecord> searchRec(BSTNode node, PeopleRecord target) {
-            if (node == null) {
-                return new ArrayList<>();
-            }
-            int cmp = comparator.compare(target, node.records.get(0));
-            if (cmp == 0) {
-                return new ArrayList<>(node.records);   // 返回副本
-            } else if (cmp < 0) {
-                return searchRec(node.left, target);
-            } else {
-                return searchRec(node.right, target);
-            }
-        }
-
-        // 返回 [节点数, 高度]
-        public int[] getInfo() {
-            int[] info = new int[2];
-            info[0] = countNodes(root);
-            info[1] = height(root);
-            return info;
-        }
-
-        private int countNodes(BSTNode node) {
-            if (node == null) return 0;
-            return 1 + countNodes(node.left) + countNodes(node.right);
-        }
-
-        private int height(BSTNode node) {
-            if (node == null) return -1;
-            return 1 + Math.max(height(node.left), height(node.right));
-        }
-
-        // 获取树中所有记录（用于堆排序）
-        public List<PeopleRecord> getAllRecords() {
-            List<PeopleRecord> all = new ArrayList<>();
-            inorderCollect(root, all);
-            return all;
-        }
-
-        private void inorderCollect(BSTNode node, List<PeopleRecord> list) {
-            if (node == null) return;
-            inorderCollect(node.left, list);
-            list.addAll(node.records);
-            inorderCollect(node.right, list);
-        }
+    /**
+     * Returns a string representation of the person record.
+     * Primarily used for debugging and displaying search results.
+     * Format: "givenName familyName (companyName)"
+     *
+     * @return A concise string representation of the person
+     */
+    @Override
+    public String toString() {
+        return String.format("%s %s (%s)", givenName, familyName, companyName);
     }
 }
